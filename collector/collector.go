@@ -5,7 +5,36 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
 	"sync"
+	"time"
+)
+
+var ErrNoData = errors.New("collector returned no data")
+
+func IsNoDataError(err error) bool {
+	return err == ErrNoData
+}
+
+const (
+	namespace       = "node1s"
+	defaultEnabled  = true
+	defaultDisabled = false
+)
+
+var (
+	scrapeDurationDesc = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "scrape", "collector_duration_seconds"),
+		"node_exporter: Duration of a collector scrape.",
+		[]string{"collector"},
+		nil,
+	)
+	scrapeSuccessDesc = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "scrape", "collector_success"),
+		"node_exporter: Whether a collector succeeded.",
+		[]string{"collector"},
+		nil,
+	)
 )
 
 var (
@@ -75,4 +104,50 @@ func NewNodeCollector(filters ...string) (*NodeCollector, error) {
 	return &NodeCollector{
 		Collectors: collectors,
 	}, nil
+}
+
+func (n NodeCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- scrapeDurationDesc
+	ch <- scrapeSuccessDesc
+}
+
+func (n NodeCollector) Collect(ch chan<- prometheus.Metric) {
+	wg := sync.WaitGroup{}
+	wg.Add(len(n.Collectors))
+	for name, c := range n.Collectors {
+		go func(name string, c Collector) {
+			execute(name, c, ch)
+			wg.Done()
+		}(name, c)
+	}
+	wg.Wait()
+}
+
+func execute(name string, c Collector, ch chan<- prometheus.Metric) {
+	start := time.Now()
+	err := c.Update(ch)
+	duration := time.Since(start)
+	var success float64
+	if err != nil {
+		if IsNoDataError(err) {
+			log.Debug().Err(err).Msgf("collector: %s duration_seconds: %v NOT Data", name, duration)
+		} else {
+			log.Error().Err(err).Msgf("collector: %s duration_seconds: %v Failed", name, duration)
+		}
+		success = 0
+	} else {
+		log.Debug().Msgf("collector: %s duration_seconds: %v Success", name, duration)
+		success = 1
+	}
+	ch <- prometheus.MustNewConstMetric(scrapeDurationDesc, prometheus.GaugeValue, duration.Seconds(), name)
+	ch <- prometheus.MustNewConstMetric(scrapeSuccessDesc, prometheus.GaugeValue, success, name)
+}
+
+type typedDesc struct {
+	desc      *prometheus.Desc
+	valueType prometheus.ValueType
+}
+
+func (d *typedDesc) mustNewConstMetric(value float64, labels ...string) prometheus.Metric {
+	return prometheus.MustNewConstMetric(d.desc, d.valueType, value, labels...)
 }

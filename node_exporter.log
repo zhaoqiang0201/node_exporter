@@ -1,2 +1,0 @@
-{"level":"panic","error":"test","time":"2024-01-23T22:55:21+08:00","caller":"/Users/zhaoqiang/Documents/owner项目/node_exporter/node_exporter.go:27"}
-{"level":"info","time":"2024-01-23T23:20:15+08:00","caller":"/Users/zhaoqiang/Documents/owner项目/node_exporter/node_exporter.go:41","message":"Starting node_exporter version %!(NOVERB)%!(EXTRA string=(version=, branch=, revision=unknown))"}
