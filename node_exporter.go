@@ -186,6 +186,9 @@ func main() {
 			os.Exit(1)
 		}
 		http.Handle("/", landingPage)
+		http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("TONG"))
+		})
 	}
 
 	if err := cmd.Execute(); err != nil {
