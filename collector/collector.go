@@ -55,7 +55,6 @@ func registerCollector(collector string, isDefaultEnabled bool, factory func() (
 	} else {
 		helpDefaultState = "disabled"
 	}
-
 	flagName := fmt.Sprintf("collector.%s", collector)
 	flagHelp := fmt.Sprintf("Enable the %s collector (default: %s)", collector, helpDefaultState)
 	flagValue := flag.Bool(flagName, isDefaultEnabled, flagHelp)
