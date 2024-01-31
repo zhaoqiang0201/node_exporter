@@ -8,4 +8,4 @@ default: build
 
 .phony: build
 build:
-	go build -ldflags="-X $(GOMODULE)/version.Version=$(VERSION)" node_exporter.go
+	CGO_ENABLED=0 go build -ldflags="-X $(GOMODULE)/version.Version=$(VERSION)" node_exporter.go
