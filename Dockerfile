@@ -1,9 +1,9 @@
 FROM golang:1.20.4 as builder
 WORKDIR /app
-ENV GOMODULE="github.com/zhaoqiang0201/node_exporter" VERSION="v0.2.1"
+ENV GOMODULE="github.com/zhaoqiang0201/node_exporter" VERSION="v0.3.0"
 
 COPY . /app/node_exporter
-RUN go env -w GOPROXY="https://goproxy.cn,direct" && cd /app/node_exporter &&  go mod tidy && go build -ldflags="-X github.com/zhaoqiang0201/node_exporter/version.Version=v0.2.1" node_exporter.go
+RUN go env -w GOPROXY="https://goproxy.cn,direct" && cd /app/node_exporter &&  go mod tidy && make
 
 FROM ubuntu:18.04
 WORKDIR /app
