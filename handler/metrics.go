@@ -64,7 +64,7 @@ func (h *handler) innerHandler(filters ...string) (http.Handler, error) {
 		}
 	}
 	r := prometheus.NewRegistry()
-	r.MustRegister(version.NewCollector("node_exporter"))
+	r.MustRegister(version.NewCollector("node1s_exporter"))
 	if err := r.Register(nc); err != nil {
 		return nil, errors.New(fmt.Sprintf("couldn't register node collector: %s", err))
 	}
