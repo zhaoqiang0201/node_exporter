@@ -12,6 +12,10 @@ type processCollector struct {
 	pidMax  *prometheus.Desc
 }
 
+func init() {
+	registerCollector("processes", defaultEnabled, NewProcessStatCollector)
+}
+
 func NewProcessStatCollector() (Collector, error) {
 	fs, err := procfs.NewFS(*procPath)
 	if err != nil {
