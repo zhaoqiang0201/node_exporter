@@ -32,7 +32,7 @@ func MetricsHandler(includeExporterMetrics bool, maxRequests int) *handler {
 		h.exporterMetricsRegistry.MustRegister(
 			promcollector.NewProcessCollector(promcollector.ProcessCollectorOpts{}),
 			promcollector.NewGoCollector(
-				promcollector.WithGoCollectorRuntimeMetrics(promcollector.MetricsScheduler),
+				promcollector.WithGoCollectorRuntimeMetrics(promcollector.MetricsAll),
 			),
 		)
 	}
